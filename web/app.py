@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_restful import Api, Resource
 from pymongo import MongoClient
 import bcrypt
@@ -8,8 +8,41 @@ import requests
 import subprocess
 import json
 
+
 app = Flask(__name__)
 api = Api(app)
+
+#----------
+"""
+will see if this works 
+just making some global variables to take in from form data
+"""
+username1=''
+password1=''
+url1=''
+admin1_pw=''
+amount1=0
+
+@app.route('/', methods=['GET', 'POST'])
+def form():
+    return render_template('form.html')
+
+@app.route('/hello', methods=['GET', 'POST'])
+def hello():
+    #username,password, url, admin_pw,amount
+    username1 =request.form['username']
+    password1 =request.form['password']
+    url1 =request.form['url']
+    admin1_pw =request.form['admin_pw']
+    amount1 =request.form['amount']
+
+    #could think about "make_response" or "jsonify" wrapping around render template?
+    #honestly this request.form could be enough?
+
+    return render_template('greeting.html', username=request.form['username'], password=request.form['password'], url=request.form['url'],admin_pw=request.form['admin_pw'],amount=request.form['amount'])
+
+
+#-----
 
 client = MongoClient("mongodb://db:27017")
 db = client.IRG
@@ -27,8 +60,8 @@ class Register(Resource):
         postedData = request.get_json()
 
         #Get the data
-        username = postedData["username"]
-        password = postedData["password"] #"123xyz"
+        username = username1 #postedData["username"]
+        password = password1 #postedData["password"] #"123xyz"
 
         if UserExist(username):
             retJson = {
@@ -86,11 +119,15 @@ def verifyCredentials(username, password):
 
 class Classify(Resource):
     def post(self):
+
+        #figure out how to jsonify the render_template
+        #even though they do 
+
         postedData = request.get_json()
 
-        username = postedData["username"]
-        password = postedData["password"]
-        url = postedData["url"]
+        username = username1 #postedData["username"]
+        password = password1 #postedData["password"]
+        url = url1 #postedData["url"]
 
         retJson, error = verifyCredentials(username, password)
         if error:
@@ -129,9 +166,9 @@ class Refill(Resource):
     def post(self):
         postedData = request.get_json()
 
-        username = postedData["username"]
-        password = postedData["admin_pw"]
-        amount = postedData["amount"]
+        username = username1 #postedData["username"]
+        password = password1 #postedData["admin_pw"]
+        amount = amount1 #postedData["amount"]
 
         if not UserExist(username):
             return jsonify(generateReturnDictionary(301, "Invalid Username"))
