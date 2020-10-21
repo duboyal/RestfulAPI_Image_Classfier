@@ -38,6 +38,7 @@ def hello():
 
     #could think about "make_response" or "jsonify" wrapping around render template?
     #honestly this request.form could be enough?
+    #could look at flask sessions or cookies
 
     return render_template('greeting.html', username=request.form['username'], password=request.form['password'], url=request.form['url'],admin_pw=request.form['admin_pw'],amount=request.form['amount'])
 
